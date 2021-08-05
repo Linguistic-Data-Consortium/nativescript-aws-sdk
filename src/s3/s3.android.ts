@@ -10,11 +10,8 @@ import {
     StatusCode,
     UploadEventData
 } from './s3-common';
-import * as utils from 'tns-core-modules/utils/utils';
-import * as fs from 'tns-core-modules/file-system';
-
-declare const com;
-
+import {Utils, File, knownFolders, path} from '@nativescript/core';
+declare var com;
 export class S3 extends S3Base {
     private static Options: S3AuthOptions;
     private static Client;
@@ -45,20 +42,20 @@ export class S3 extends S3Base {
             }
             S3.TransferUtility = new com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility.builder()
                 .s3Client(S3.Client)
-                .context(utils.ad.getApplicationContext())
+                .context(Utils.ad.getApplicationContext())
                 .build();
         }
     }
 
     public createDownload(options: S3DownloadOptions): number {
-        const appRoot = fs.knownFolders.currentApp().path;
-        let file;
+        const appRoot = knownFolders.currentApp().path;
+        let file: File;
         if (options.file && options.file.startsWith('~/')) {
-            file = fs.File.fromPath(fs.path.join(appRoot, options.file.replace('~/', '')));
+            file = File.fromPath(path.join(appRoot, options.file.replace('~/', '')));
         } else if (options.file && options.file.startsWith('/')) {
-            file = fs.File.fromPath(options.file);
+            file = File.fromPath(options.file);
         } else if (options.file && options.file.startsWith('file:')) {
-            file = fs.File.fromPath(NSURL.URLWithString(options.file).path);
+            file = File.fromPath(NSURL.URLWithString(options.file).path);
         }
 
         const fileDownload = S3.TransferUtility.download(options.bucketName, options.key, new java.io.File(file.path));
@@ -161,16 +158,16 @@ export class S3 extends S3Base {
     }
 
     public createUpload(options: S3UploadOptions): number {
-        const appRoot = fs.knownFolders.currentApp().path;
+        const appRoot = knownFolders.currentApp().path;
         let file;
         if (options.file && options.file.startsWith('~/')) {
-            file = fs.File.fromPath(fs.path.join(appRoot, options.file.replace('~/', '')));
+            file = File.fromPath(path.join(appRoot, options.file.replace('~/', '')));
         } else if (options.file && options.file.startsWith('/')) {
-            file = fs.File.fromPath(options.file);
+            file = File.fromPath(options.file);
         } else if (options.file && options.file.startsWith('file:')) {
-            file = fs.File.fromPath(NSURL.URLWithString(options.file).path);
+            file = File.fromPath(NSURL.URLWithString(options.file).path);
         }
-        let acl;
+        let acl; 
         switch (options.acl) {
             case 'private':
                 acl = com.amazonaws.services.s3.model.CannedAccessControlList.Private;
